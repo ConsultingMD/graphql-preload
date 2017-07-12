@@ -1,5 +1,6 @@
 module GraphQL
   module Preload
+    # Preloads ActiveRecord::Associations when called from the Preload::Instrument
     class Loader < GraphQL::Batch::Loader
       attr_reader :association, :klass
 
@@ -13,8 +14,9 @@ module GraphQL
       end
 
       def load(model)
-        raise TypeError,
-          "loader for #{klass.name} can't load associations for #{model.class.name} objects" unless model.is_a?(klass)
+        unless model.is_a?(klass)
+          raise TypeError, "loader for #{klass.name} can't load associations for #{model.class.name} objects"
+        end
 
         if model.association(association).loaded?
           Promise.resolve(model)
@@ -29,12 +31,17 @@ module GraphQL
       end
 
       private def validate_association
-        raise ArgumentError,
-          "association must be a Symbol object" unless association.is_a?(Symbol)
-        raise ArgumentError,
-          "class must be an ActiveRecord::Base descendant" unless klass < ActiveRecord::Base
-        raise TypeError,
-          "association :#{association} does not exist on #{klass.name}" unless klass.reflect_on_association(association)
+        unless association.is_a?(Symbol)
+          raise ArgumentError, 'association must be a Symbol object'
+        end
+
+        unless klass < ActiveRecord::Base
+          raise ArgumentError, 'class must be an ActiveRecord::Base descendant'
+        end
+
+        return if klass.reflect_on_association(association)
+
+        raise TypeError, "association :#{association} does not exist on #{klass.name}"
       end
     end
   end

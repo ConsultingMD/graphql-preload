@@ -1,5 +1,6 @@
 module GraphQL
   module Preload
+    # Provides an instrument for the GraphQL::Field :preload definition
     class Instrument
       def instrument(_type, field)
         return field unless field.metadata.include?(:preload)
@@ -36,7 +37,11 @@ module GraphQL
                 when ActiveRecord::Base
                   preload(associated_model, sub_association)
                 else
-                  Promise.all(Array.wrap(associated_model).map { |next_model| preload(next_model, sub_association) })
+                  Promise.all(
+                    Array.wrap(associated_model).map do |next_model|
+                      preload(next_model, sub_association)
+                    end
+                  )
                 end
               end
             end

@@ -20,6 +20,27 @@ Or install it yourself as:
 
 ## Usage
 
+First, add the instrument to your `GraphQL::Schema`:
+
+    Schema = GraphQL::Schema.define do
+      instrument(:field, GraphQL::Preload::Instrument.new)
+    end
+
+Call your new instrument when defining your field:
+
+    PostType = GraphQL::ObjectType.define do
+      name 'Post'
+
+      field :comments, !types[!CommentType] do
+        preload comments: :author
+
+        resolve ->(obj, args, ctx) { obj.comments }
+      end
+
+      # Or you can use the more terse syntax:
+      field :comments, !types[!CommentType], preload: { comments: :author }, property: :comments
+    end
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

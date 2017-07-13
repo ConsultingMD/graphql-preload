@@ -7,6 +7,8 @@ module GraphQL
 
         old_resolver = field.resolve_proc
         new_resolver = ->(obj, args, ctx) do
+          return old_resolver.call(obj, args, ctx) unless obj
+
           preload(obj, field.metadata[:preload]).then do
             old_resolver.call(obj, args, ctx)
           end

@@ -1,7 +1,5 @@
-require 'activerecord'
 require 'graphql'
-require 'graphql-batch'
-require 'promise'
+require 'promise.rb'
 
 GraphQL::Field.accepts_definitions(
   preload: ->(type, *args) do
@@ -13,8 +11,8 @@ GraphQL::Field.accepts_definitions(
 module GraphQL
   # Provides a GraphQL::Field definition to preload ActiveRecord::Associations
   module Preload
-    autoload :instrument, 'preload/instrument'
-    autoload :loader, 'preload/loader'
+    autoload :Instrument, 'preload/instrument'
+    autoload :Loader, 'preload/loader'
     autoload :VERSION, 'preload/version'
   end
 end

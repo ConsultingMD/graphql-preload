@@ -2,35 +2,35 @@ module GraphQL
   module Preload
     # Preloads ActiveRecord::Associations when called from the Preload::Instrument
     class Loader < GraphQL::Batch::Loader
-      attr_reader :association, :klass
+      attr_reader :association, :model
 
-      def initialize(klass, association)
+      def initialize(model, association)
         @association = association
-        @klass = klass
+        @model = model
 
         validate_association
       end
 
-      def load(model)
-        unless model.is_a?(klass)
-          raise TypeError, "loader for #{klass.name} can't load associations for #{model.class.name} objects"
+      def load(record)
+        unless record.is_a?(model)
+          raise TypeError, "loader for #{model.name} can't load associations for #{record.class.name} objects"
         end
 
-        if model.association(association).loaded?
-          Promise.resolve(model)
+        if record.association(association).loaded?
+          Promise.resolve(record)
         else
           super
         end
       end
 
-      def perform(models)
+      def perform(records)
         if ActiveRecord::VERSION::MAJOR > 3
-          ActiveRecord::Associations::Preloader.new.preload(models, association)
+          ActiveRecord::Associations::Preloader.new.preload(records, association)
         else
-          ActiveRecord::Associations::Preloader.new(models, association).run
+          ActiveRecord::Associations::Preloader.new(records, association).run
         end
 
-        models.each { |model| fulfill(model, model) }
+        records.each { |record| fulfill(record, record) }
       end
 
       private def validate_association
@@ -38,13 +38,13 @@ module GraphQL
           raise ArgumentError, 'association must be a Symbol object'
         end
 
-        unless klass < ActiveRecord::Base
-          raise ArgumentError, 'class must be an ActiveRecord::Base descendant'
+        unless model < ActiveRecord::Base
+          raise ArgumentError, 'model must be an ActiveRecord::Base descendant'
         end
 
-        return if klass.reflect_on_association(association)
+        return if model.reflect_on_association(association)
 
-        raise TypeError, "association :#{association} does not exist on #{klass.name}"
+        raise TypeError, "association :#{association} does not exist on #{model.name}"
       end
     end
   end

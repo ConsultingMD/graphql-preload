@@ -19,29 +19,31 @@ module GraphQL
         end
       end
 
-      private def preload(model, associations)
-        return preload_single_association(model, associations) if associations.is_a?(Symbol)
+      private def preload(record, associations)
+        return preload_single_association(record, associations) if associations.is_a?(Symbol)
 
         promises = []
 
         Array.wrap(associations).each do |association|
           case association
           when Symbol
-            promises << preload_single_association(model, association)
+            promises << preload_single_association(record, association)
           when Array
-            association.each { |sub_association| promises << preload(model, sub_association) }
+            association.each do |sub_association|
+              promises << preload(record, sub_association)
+            end
           when Hash
-            association.each do |association_key, sub_association|
-              promises << preload_single_association(model, association_key).then do
-                associated_model = model.public_send(association_key)
+            association.each do |sub_association, property|
+              promises << preload_single_association(record, sub_association).then do
+                associated_records = record.public_send(sub_association)
 
-                case associated_model
+                case associated_records
                 when ActiveRecord::Base
-                  preload(associated_model, sub_association)
+                  preload(associated_records, property)
                 else
                   Promise.all(
-                    Array.wrap(associated_model).map do |next_model|
-                      preload(next_model, sub_association)
+                    Array.wrap(associated_records).map do |associated_record|
+                      preload(associated_record, property)
                     end
                   )
                 end
@@ -53,9 +55,9 @@ module GraphQL
         Promise.all(promises)
       end
 
-      private def preload_single_association(model, association)
-        return Promise.resolve(model) if model.association(association).loaded?
-        GraphQL::Preload::Loader.for(model.class, association).load(model)
+      private def preload_single_association(record, association)
+        return Promise.resolve(record) if record.association(association).loaded?
+        GraphQL::Preload::Loader.for(record.class, association).load(record)
       end
     end
   end

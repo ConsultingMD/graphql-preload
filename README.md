@@ -20,10 +20,12 @@ Or install it yourself as:
 
 ## Usage
 
-First, add the instrument to your `GraphQL::Schema`:
+First, enable preloading in your `GraphQL::Schema`:
 
     Schema = GraphQL::Schema.define do
-      instrument(:field, GraphQL::Preload::Instrument.new)
+      use GraphQL::Batch
+
+      enable_preloading
     end
 
 Call your new instrument when defining your field:

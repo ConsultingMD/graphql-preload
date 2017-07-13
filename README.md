@@ -28,19 +28,17 @@ First, enable preloading in your `GraphQL::Schema`:
       enable_preloading
     end
 
-Call your new instrument when defining your field:
+Call `preload` when defining your field:
 
     PostType = GraphQL::ObjectType.define do
       name 'Post'
 
       field :comments, !types[!CommentType] do
-        preload comments: :author
+        # Post.includes(:comments)
+        preload :comments
 
         resolve ->(obj, args, ctx) { obj.comments }
       end
-
-      # Or you can use the more terse syntax:
-      field :comments, !types[!CommentType], preload: { comments: :author }, property: :comments
     end
 
 ## Development

@@ -9,8 +9,6 @@ module GraphQL
         @klass = klass
 
         validate_association
-
-        freeze
       end
 
       def load(model)
@@ -26,7 +24,12 @@ module GraphQL
       end
 
       def perform(models)
-        ActiveRecord::Associations::Preloader.new.preload(models, association)
+        if ActiveRecord::VERSION::MAJOR > 3
+          ActiveRecord::Associations::Preloader.new.preload(models, association)
+        else
+          ActiveRecord::Associations::Preloader.new(models, association).run
+        end
+
         models.each { |model| fulfill(model, model) }
       end
 

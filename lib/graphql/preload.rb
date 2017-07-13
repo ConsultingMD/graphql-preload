@@ -11,8 +11,8 @@ GraphQL::Field.accepts_definitions(
 module GraphQL
   # Provides a GraphQL::Field definition to preload ActiveRecord::Associations
   module Preload
-    autoload :Instrument, 'preload/instrument'
-    autoload :Loader, 'preload/loader'
-    autoload :VERSION, 'preload/version'
+    autoload :Instrument, 'graphql/preload/instrument'
+    autoload :Loader, 'graphql/preload/loader'
+    autoload :VERSION, 'graphql/preload/version'
   end
 end

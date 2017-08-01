@@ -40,8 +40,8 @@ Call `preload` when defining your field:
         # Post.includes(:comments, :authors)
         preload [:comments, :authors]
 
-        # Post.includes(:comments, authors: [:posts, :followers])
-        preload [:comments, { authors: [:posts, :followers] }]
+        # Post.includes(:comments, authors: [:followers, :posts])
+        preload [:comments, { authors: [:followers, :posts] }]
 
         resolve ->(obj, args, ctx) { obj.comments }
       end

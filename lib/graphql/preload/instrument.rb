@@ -33,17 +33,17 @@ module GraphQL
               promises << preload(record, sub_association)
             end
           when Hash
-            association.each do |sub_association, property|
+            association.each do |sub_association, nested_association|
               promises << preload_single_association(record, sub_association).then do
                 associated_records = record.public_send(sub_association)
 
                 case associated_records
                 when ActiveRecord::Base
-                  preload(associated_records, property)
+                  preload(associated_records, nested_association)
                 else
                   Promise.all(
                     Array.wrap(associated_records).map do |associated_record|
-                      preload(associated_record, property)
+                      preload(associated_record, nested_association)
                     end
                   )
                 end
@@ -56,7 +56,6 @@ module GraphQL
       end
 
       private def preload_single_association(record, association)
-        return Promise.resolve(record) if record.association(association).loaded?
         GraphQL::Preload::Loader.for(record.class, association).load(record)
       end
     end

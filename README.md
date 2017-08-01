@@ -1,5 +1,7 @@
 # GraphQL::Preload
 
+[![Gem Version](https://badge.fury.io/rb/graphql-preload.svg)](https://rubygems.org/gems/graphql-preload)
+
 Provides a DSL for the [`graphql` gem](https://github.com/rmosolgo/graphql-ruby) that allows ActiveRecord associations to be preloaded in field definitions. Based on a [gist](https://gist.github.com/theorygeek/a1a59a2bf9c59e4b3706ac68d12c8434) by @theorygeek.
 
 ## Installation

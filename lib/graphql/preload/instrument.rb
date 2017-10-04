@@ -20,6 +20,7 @@ module GraphQL
       end
 
       private def preload(record, associations)
+        raise TypeError, "Expected #{associations} to be a Symbol, not a String" if associations.is_a?(String)
         return preload_single_association(record, associations) if associations.is_a?(Symbol)
 
         promises = []

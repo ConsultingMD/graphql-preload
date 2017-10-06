@@ -3,12 +3,13 @@ module GraphQL
     # Preloads ActiveRecord::Associations when called from the Preload::Instrument
     class Loader < GraphQL::Batch::Loader
       attr_reader :association, :model
+      attr_accessor :scope
 
       def cache_key(record)
         record.object_id
       end
 
-      def initialize(model, association)
+      def initialize(model, association, _scope_lambda)
         @association = association
         @model = model
 
@@ -34,10 +35,13 @@ module GraphQL
       end
 
       private def preload_association(records)
+        if scope && (scope.klass != model.reflect_on_association(association).klass)
+          self.scope = nil
+        end
         if ActiveRecord::VERSION::MAJOR > 3
-          ActiveRecord::Associations::Preloader.new.preload(records, association)
+          ActiveRecord::Associations::Preloader.new.preload(records, association, scope)
         else
-          ActiveRecord::Associations::Preloader.new(records, association).run
+          ActiveRecord::Associations::Preloader.new(records, association, scope).run
         end
       end
 

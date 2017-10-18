@@ -3,10 +3,8 @@ require 'graphql/batch'
 require 'promise.rb'
 
 GraphQL::Field.accepts_definitions(
-  preload: ->(type, *args) do
-    type.metadata[:preload] ||= []
-    type.metadata[:preload].concat(args)
-  end
+  preload: GraphQL::Define.assign_metadata_key(:preload),
+  preload_conditions: GraphQL::Define.assign_metadata_key(:preload_conditions)
 )
 
 GraphQL::Schema.accepts_definitions(

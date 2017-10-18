@@ -2,17 +2,18 @@ module GraphQL
   module Preload
     # Preloads ActiveRecord::Associations when called from the Preload::Instrument
     class Loader < GraphQL::Batch::Loader
-      attr_reader :association, :model
+      attr_reader :association, :conditions, :model
 
       def cache_key(record)
         record.object_id
       end
 
-      def initialize(model, association)
+      def initialize(model, association, conditions)
         @association = association
+        @conditions = conditions
         @model = model
 
-        validate_association
+        validate
       end
 
       def load(record)
@@ -35,15 +36,24 @@ module GraphQL
 
       private def preload_association(records)
         if ActiveRecord::VERSION::MAJOR > 3
-          ActiveRecord::Associations::Preloader.new.preload(records, association)
+          ActiveRecord::Associations::Preloader.new.preload(records, association, preload_scope)
         else
-          ActiveRecord::Associations::Preloader.new(records, association).run
+          ActiveRecord::Associations::Preloader.new(records, association, conditions: conditions).run
         end
       end
 
-      private def validate_association
+      private def preload_scope
+        return unless conditions
+        model.reflect_on_association(association).klass.where(conditions)
+      end
+
+      private def validate
         unless association.is_a?(Symbol)
           raise ArgumentError, 'Association must be a Symbol object'
+        end
+
+        if conditions && !conditions.is_a?(Hash)
+          raise ArgumentError, 'Preload conditions must be a Hash object'
         end
 
         unless model < ActiveRecord::Base

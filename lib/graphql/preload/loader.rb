@@ -30,6 +30,10 @@ module GraphQL
         records.each { |record| fulfill(record, record) }
       end
 
+      private def association_class
+        model.reflect_on_association(association).klass
+      end
+
       private def association_loaded?(record)
         record.association(association).loaded?
       end
@@ -44,7 +48,11 @@ module GraphQL
 
       private def preload_scope
         return unless conditions
-        model.reflect_on_association(association).klass.where(conditions)
+        if conditions.respond_to?(:to_proc)
+          association_class.send(:instance_eval, &conditions)
+        else
+          association_class.where(conditions)
+        end
       end
 
       private def validate
@@ -52,8 +60,8 @@ module GraphQL
           raise ArgumentError, 'Association must be a Symbol object'
         end
 
-        if conditions && !conditions.is_a?(Hash)
-          raise ArgumentError, 'Preload conditions must be a Hash object'
+        if conditions && !(conditions.is_a?(Hash) || conditions.respond_to?(:to_proc))
+          raise ArgumentError, 'Preload conditions must be a Proc or Hash object'
         end
 
         unless model < ActiveRecord::Base

@@ -34,7 +34,7 @@ module GraphQL
       end
 
       private def preload_association(records)
-        if ActiveRecord.version >= Gem::Version.new('4.1.0.beta1')
+        if Gem::Version.new(ActiveRecord::VERSION::STRING) >= Gem::Version.new('4.1.0.beta1')
           ActiveRecord::Associations::Preloader.new.preload(records, association)
         else
           ActiveRecord::Associations::Preloader.new(records, association).run

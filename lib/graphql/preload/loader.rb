@@ -34,7 +34,8 @@ module GraphQL
       end
 
       private def preload_association(records)
-        if ActiveRecord::VERSION::MAJOR > 3
+        if ((ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1) ||
+            ActiveRecord::VERSION::MAJOR > 4)
           ActiveRecord::Associations::Preloader.new.preload(records, association)
         else
           ActiveRecord::Associations::Preloader.new(records, association).run

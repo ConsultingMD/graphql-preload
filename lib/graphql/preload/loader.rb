@@ -9,7 +9,7 @@ module GraphQL
         record.object_id
       end
 
-      def initialize(model, association, _scope_lambda)
+      def initialize(model, association, _scope_sql)
         @association = association
         @model = model
 

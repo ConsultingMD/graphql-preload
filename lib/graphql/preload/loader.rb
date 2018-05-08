@@ -35,11 +35,19 @@ module GraphQL
       end
 
       private def preload_association(records)
+        preload_scope = if scope&.klass ==
+                            model.reflect_on_association(association).klass
+                          scope
+                        else
+                          nil
+                        end
         if ((ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1) ||
             ActiveRecord::VERSION::MAJOR > 4)
-          ActiveRecord::Associations::Preloader.new.preload(records, association, scope)
+          ActiveRecord::Associations::Preloader.new.preload(records, association,
+            preload_scope)
         else
-          ActiveRecord::Associations::Preloader.new(records, association, scope).run
+          ActiveRecord::Associations::Preloader.new(records, association,
+            preload_scope).run
         end
       end
 

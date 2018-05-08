@@ -75,8 +75,9 @@ module GraphQL
         # object used will be the last one, which shouldn't make any difference,
         # beacuse even though they are different objects, they are all
         # equivalent.
+
         loader = GraphQL::Preload::Loader.for(record.class, association,
-          scope.to_sql)
+          scope&.to_sql)
         loader.scope = scope
         loader.load(record)
       end

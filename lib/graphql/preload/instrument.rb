@@ -9,7 +9,11 @@ module GraphQL
         new_resolver = ->(obj, args, ctx) do
           return old_resolver.call(obj, args, ctx) unless obj
 
-          preload(obj, field.metadata[:preload]).then do
+          if field.metadata[:preload_scope]
+            scope = field.metadata[:preload_scope].call(args, ctx)
+          end
+
+          preload(obj.object, field.metadata[:preload], scope).then do
             old_resolver.call(obj, args, ctx)
           end
         end

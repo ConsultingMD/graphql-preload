@@ -77,7 +77,7 @@ module GraphQL
         # equivalent.
 
         loader = GraphQL::Preload::Loader.for(record.class, association,
-          scope&.to_sql)
+          scope.try(:to_sql))
         loader.scope = scope
         loader.load(record)
       end

@@ -6,7 +6,8 @@ GraphQL::Field.accepts_definitions(
   preload: ->(type, *args) do
     type.metadata[:preload] ||= []
     type.metadata[:preload].concat(args)
-  end
+  end,
+  preload_scope: ->(type, arg) { type.metadata[:preload_scope] = arg }
 )
 
 GraphQL::Schema.accepts_definitions(

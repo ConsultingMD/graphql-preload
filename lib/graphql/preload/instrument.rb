@@ -42,8 +42,7 @@ module GraphQL
             end
           when Hash
             association.each do |sub_association, nested_association|
-              promises << preload_single_association(record, sub_association,
-                  scope).then do
+              promises << preload_single_association(record, sub_association, scope).then do
                 associated_records = record.public_send(sub_association)
 
                 case associated_records
@@ -65,19 +64,16 @@ module GraphQL
       end
 
       private def preload_single_association(record, association, scope)
-        # We would like to pass the `scope` (which is an
-        # `ActiveRecord::Relation`), directly into `Loader.for`, because that is
-        # what is needed for `Preloader.new`.  However, because the scope is
+        # We would like to pass the `scope` (which is an `ActiveRecord::Relation`),
+        # directly into `Loader.for`. However, because the scope is
         # created for each parent record, they are different objects and
-        # therefore would return different loaders, breaking batching.
+        # return different loaders, breaking batching.
         # Therefore, we pass in `scope.to_sql`, which is the same for all the
-        # scopes and set the `scope` using an accessor.  So the actual scope
+        # scopes and set the `scope` using an accessor. The actual scope
         # object used will be the last one, which shouldn't make any difference,
-        # beacuse even though they are different objects, they are all
-        # equivalent.
-
-        loader = GraphQL::Preload::Loader.for(record.class, association,
-          scope.try(:to_sql))
+        # because even though they are different objects, they are all
+        # functionally equivalent.
+        loader = GraphQL::Preload::Loader.for(record.class, association, scope.try(:to_sql))
         loader.scope = scope
         loader.load(record)
       end

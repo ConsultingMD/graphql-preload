@@ -2,8 +2,8 @@ module GraphQL
   module Preload
     # Preloads ActiveRecord::Associations when called from the Preload::Instrument
     class Loader < GraphQL::Batch::Loader
-      attr_reader :association, :model
       attr_accessor :scope
+      attr_reader :association, :model
 
       def cache_key(record)
         record.object_id
@@ -46,11 +46,7 @@ module GraphQL
       end
 
       private def preload_scope
-        if scope.try(:klass) == model.reflect_on_association(association).klass
-          scope
-        else
-          nil
-        end
+        scope if scope.try(:klass) == model.reflect_on_association(association).klass
       end
 
       private def validate_association

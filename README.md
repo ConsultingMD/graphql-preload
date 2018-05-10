@@ -49,6 +49,27 @@ Call `preload` when defining your field:
       end
     end
 
+### `preload_scope`
+Starting with Rails 4.1, you can scope your preloaded records by passing a valid scope to [`ActiveRecord::Associations::Preloader`](https://apidock.com/rails/v4.1.8/ActiveRecord/Associations/Preloader/preload). Scoping can improve performance by reducing the number of models to be instantiated and can help with certain business goals (e.g., only returning records that have not been soft deleted).
+
+This functionality is surfaced through the `preload_scope` option:
+
+    PostType = GraphQL::ObjectType.define do
+      name 'Post'
+
+      field :comments, !types[!CommentType] do
+        preload :comments
+        preload_scope ->(args, ctx) { Comment.where(deleted_at: nil) }
+
+        # Resolves with records returned from the following query:
+        # SELECT "comments".*
+        # FROM "comments"
+        # WHERE "comments"."deleted_at" IS NULL
+        #   AND "comments"."post_id" IN (1, 2, 3)
+        resolve ->(obj, args, ctx) { obj.comments }
+      end
+    end
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

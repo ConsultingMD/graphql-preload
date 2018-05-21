@@ -39,7 +39,10 @@ module GraphQL
       end
 
       private def preload_scope
-        scope if scope.try(:klass) == model.reflect_on_association(association).klass
+        return nil unless scope
+        reflection = model.reflect_on_association(association)
+        raise ArgumentError, 'Cannot specify preload_scope for polymorphic associations' if reflection.polymorphic?
+        scope if scope.try(:klass) == reflection.klass
       end
 
       private def validate_association

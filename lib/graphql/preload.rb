@@ -17,14 +17,18 @@ module GraphQL
 
     module FieldMetadata
       def initialize(*args, preload: nil, preload_scope: nil, **kwargs, &block)
-        if preload
-          @preload ||= []
-          @preload.concat Array.wrap preload
-        end
-        if preload_scope
-          @preload_scope = preload_scope
-        end
         super(*args, **kwargs, &block)
+        self.preload(preload) if preload
+        self.preload_scope(preload_scope) if preload_scope
+      end
+
+      def preload(associations)
+        @preload ||= []
+        @preload.concat Array.wrap associations
+      end
+
+      def preload_scope(scope_proc)
+        @preload_scope = scope_proc
       end
 
       def to_graphql

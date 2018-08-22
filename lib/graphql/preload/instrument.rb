@@ -13,7 +13,7 @@ module GraphQL
             scope = field.metadata[:preload_scope].call(args, ctx)
           end
 
-          preload(obj, field.metadata[:preload], scope).then do
+          preload(obj.object, field.metadata[:preload], scope).then do
             old_resolver.call(obj, args, ctx)
           end
         end

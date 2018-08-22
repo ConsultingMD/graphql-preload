@@ -2,8 +2,8 @@ module GraphQL
   module Preload
     # Preloads ActiveRecord::Associations when called from the Preload::Instrument
     class Loader < GraphQL::Batch::Loader
-      attr_reader :association, :model
       attr_accessor :scope
+      attr_reader :association, :model
 
       def cache_key(record)
         record.object_id
@@ -35,22 +35,14 @@ module GraphQL
       end
 
       private def preload_association(records)
-        if ((ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 1) ||
-            ActiveRecord::VERSION::MAJOR > 4)
-          ActiveRecord::Associations::Preloader.new.preload(records, association,
-            preload_scope)
-        else
-          ActiveRecord::Associations::Preloader.new(records, association,
-            preload_scope).run
-        end
+        ActiveRecord::Associations::Preloader.new.preload(records, association, preload_scope)
       end
 
       private def preload_scope
-        if scope.try(:klass) == model.reflect_on_association(association).klass
-          scope
-        else
-          nil
-        end
+        return nil unless scope
+        reflection = model.reflect_on_association(association)
+        raise ArgumentError, 'Cannot specify preload_scope for polymorphic associations' if reflection.polymorphic?
+        scope if scope.try(:klass) == reflection.klass
       end
 
       private def validate_association

@@ -24,30 +24,57 @@ Or install it yourself as:
 
 First, enable preloading in your `GraphQL::Schema`:
 
-    Schema = GraphQL::Schema.define do
-      use GraphQL::Batch
+```ruby
+Schema = GraphQL::Schema.define do
+  use GraphQL::Batch
 
-      enable_preloading
-    end
+  enable_preloading
+end
+```
 
 Call `preload` when defining your field:
 
-    PostType = GraphQL::ObjectType.define do
-      name 'Post'
+```ruby
+PostType = GraphQL::ObjectType.define do
+  name 'Post'
 
-      field :comments, !types[!CommentType] do
-        # Post.includes(:comments)
-        preload :comments
+  field :comments, !types[!CommentType] do
+    # Post.includes(:comments)
+    preload :comments
 
-        # Post.includes(:comments, :authors)
-        preload [:comments, :authors]
+    # Post.includes(:comments, :authors)
+    preload [:comments, :authors]
 
-        # Post.includes(:comments, authors: [:followers, :posts])
-        preload [:comments, { authors: [:followers, :posts] }]
+    # Post.includes(:comments, authors: [:followers, :posts])
+    preload [:comments, { authors: [:followers, :posts] }]
 
-        resolve ->(obj, args, ctx) { obj.comments }
-      end
-    end
+    resolve ->(obj, args, ctx) { obj.comments }
+  end
+end
+```
+
+### `preload_scope`
+Starting with Rails 4.1, you can scope your preloaded records by passing a valid scope to [`ActiveRecord::Associations::Preloader`](https://apidock.com/rails/v4.1.8/ActiveRecord/Associations/Preloader/preload). Scoping can improve performance by reducing the number of models to be instantiated and can help with certain business goals (e.g., only returning records that have not been soft deleted).
+
+This functionality is surfaced through the `preload_scope` option:
+
+```ruby
+PostType = GraphQL::ObjectType.define do
+  name 'Post'
+
+  field :comments, !types[!CommentType] do
+    preload :comments
+    preload_scope ->(args, ctx) { Comment.where(deleted_at: nil) }
+
+    # Resolves with records returned from the following query:
+    # SELECT "comments".*
+    # FROM "comments"
+    # WHERE "comments"."deleted_at" IS NULL
+    #   AND "comments"."post_id" IN (1, 2, 3)
+    resolve ->(obj, args, ctx) { obj.comments }
+  end
+end
+```
 
 ## Development
 

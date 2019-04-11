@@ -86,7 +86,7 @@ module GraphQL
       private def merged_metadata(field)
         type_class = field.metadata.fetch(:type_class, nil)
 
-        if type_class.nil?
+        if type_class.nil? || !type_class.respond_to?(:to_graphql)
           field.metadata
         else
           field.metadata.merge(type_class.to_graphql.metadata)

@@ -3,21 +3,22 @@ module GraphQL
     # Provides an instrument for the GraphQL::Field :preload definition
     class Instrument
       def instrument(_type, field)
-        return field unless field.metadata.include?(:preload)
+        metadata = merged_metadata(field)
+        return field if metadata.fetch(:preload, nil).nil?
 
         old_resolver = field.resolve_proc
         new_resolver = ->(obj, args, ctx) do
           return old_resolver.call(obj, args, ctx) unless obj
 
-          if field.metadata[:preload_scope]
-            scope = field.metadata[:preload_scope].call(args, ctx)
+          if metadata[:preload_scope]
+            scope = metadata[:preload_scope].call(args, ctx)
           end
 
           is_graphql_object = obj.is_a?(GraphQL::Schema::Object)
           respond_to_object = obj.respond_to?(:object)
           record = is_graphql_object && respond_to_object ? obj.object : obj
 
-          preload(record, field.metadata[:preload], scope).then do
+          preload(record, metadata[:preload], scope).then do
             old_resolver.call(obj, args, ctx)
           end
         end
@@ -81,6 +82,17 @@ module GraphQL
         loader.scope = scope
         loader.load(record)
       end
+
+      private def merged_metadata(field)
+        type_class = field.metadata.fetch(:type_class, nil)
+
+        if type_class.nil?
+          field.metadata
+        else
+          field.metadata.merge(type_class.to_graphql.metadata)
+        end
+      end
+
     end
   end
 end

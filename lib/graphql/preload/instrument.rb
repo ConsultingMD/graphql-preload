@@ -13,7 +13,11 @@ module GraphQL
             scope = field.metadata[:preload_scope].call(args, ctx)
           end
 
-          preload(obj.object, field.metadata[:preload], scope).then do
+          is_graphql_object = obj.is_a?(GraphQL::Schema::Object)
+          respond_to_object = obj.respond_to?(:object)
+          record = is_graphql_object && respond_to_object ? obj.object : obj
+
+          preload(record, field.metadata[:preload], scope).then do
             old_resolver.call(obj, args, ctx)
           end
         end

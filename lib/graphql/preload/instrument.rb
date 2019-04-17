@@ -36,6 +36,9 @@ module GraphQL
           case association
           when Symbol
             promises << preload_single_association(record, association, scope)
+          when Proc
+            proc_association = association.call(record)
+            promises << preload(record, proc_association, scope) if proc_association
           when Array
             association.each do |sub_association|
               promises << preload(record, sub_association, scope)

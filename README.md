@@ -47,6 +47,9 @@ PostType = GraphQL::ObjectType.define do
 
     # Post.includes(:comments, authors: [:followers, :posts])
     preload [:comments, { authors: [:followers, :posts] }]
+    
+    #Post.includes(:special_comments)
+    preload -> (record) { record.is_a?(SpecialPost) ? :special_comments : :comments }
 
     resolve ->(obj, args, ctx) { obj.comments }
   end

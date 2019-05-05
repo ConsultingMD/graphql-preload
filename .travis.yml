@@ -1,0 +1,17 @@
+---
+language: ruby
+sudo: false
+cache: bundler
+rvm:
+  - 2.3
+  - 2.6
+gemfile:
+ - gemfiles/graphql-1.8.gemfile
+ - gemfiles/graphql-1.9.gemfile
+env:
+  - TESTING_INTERPRETER=true
+  - TESTING_INTERPRETER=false
+matrix:
+  exclude:
+    - gemfile: gemfiles/graphql-1.8.gemfile
+      env: TESTING_INTERPRETER=true

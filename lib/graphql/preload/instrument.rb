@@ -1,27 +1,6 @@
 module GraphQL
   module Preload
-    # Provides an instrument for the GraphQL::Field :preload definition
-    class Instrument
-      def instrument(_type, field)
-        return field unless field.metadata.include?(:preload)
-
-        old_resolver = field.resolve_proc
-        new_resolver = ->(obj, args, ctx) do
-          return old_resolver.call(obj, args, ctx) unless obj
-
-          if field.metadata[:preload_scope]
-            scope = field.metadata[:preload_scope].call(args, ctx)
-          end
-
-          preload(obj.object, field.metadata[:preload], scope).then do
-            old_resolver.call(obj, args, ctx)
-          end
-        end
-
-        field.redefine do
-          resolve(new_resolver)
-        end
-      end
+    module FieldPreloader
 
       private def preload(record, associations, scope)
         if associations.is_a?(String)
@@ -78,5 +57,58 @@ module GraphQL
         loader.load(record)
       end
     end
+
+    if Gem::Version.new(GraphQL::VERSION) >= Gem::Version.new('1.9.0.pre3')
+      class FieldExtension < GraphQL::Schema::FieldExtension
+        include FieldPreloader
+
+        def resolve(object:, arguments:, context:)
+          yield(object, arguments) unless object
+
+          if field.preload_scope
+            scope = field.preload_scope.call(args, context)
+          end
+
+          preload(object.object, field.preload, scope).then do
+            yield(object, arguments)
+          end
+        end
+      end
+    end
+
+
+    # Provides an instrument for the GraphQL::Field :preload definition
+    class Instrument
+      include FieldPreloader
+
+      def instrument(_type, field)
+        return field unless field.metadata.include?(:preload)
+
+        if defined?(FieldExtension) &&
+            (type_class = field.metadata[:type_class])
+
+          type_class.extension(FieldExtension)
+          field
+        else
+          old_resolver = field.resolve_proc
+          new_resolver = ->(obj, args, ctx) do
+            return old_resolver.call(obj, args, ctx) unless obj
+
+            if field.metadata[:preload_scope]
+              scope = field.metadata[:preload_scope].call(args, ctx)
+            end
+
+            preload(obj.object, field.metadata[:preload], scope).then do
+              old_resolver.call(obj, args, ctx)
+            end
+          end
+
+          field.redefine do
+            resolve(new_resolver)
+          end
+        end
+      end
+    end
+
   end
 end

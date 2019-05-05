@@ -51,7 +51,7 @@ module GraphQL
         end
 
         unless model < ActiveRecord::Base
-          raise ArgumentError, 'Model must be an ActiveRecord::Base descendant'
+          raise ArgumentError, "Model #{model} must be an ActiveRecord::Base descendant"
         end
 
         return if model.reflect_on_association(association)

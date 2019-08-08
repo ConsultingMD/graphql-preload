@@ -3,7 +3,7 @@ module GraphQL
     # Provides an instrument for the GraphQL::Field :preload definition
     class Instrument
       def instrument(_type, field)
-        return field unless field.metadata.include?(:preload)
+        return field unless field.metadata[:preload]
 
         old_resolver = field.resolve_proc
         new_resolver = ->(obj, args, ctx) do

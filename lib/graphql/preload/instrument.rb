@@ -24,6 +24,7 @@ module GraphQL
       end
 
       private def preload(record, associations, scope)
+        record = record.to_model if record.respond_to?(:to_model)
         if associations.is_a?(String)
           raise TypeError, "Expected #{associations} to be a Symbol, not a String"
         elsif associations.is_a?(Symbol)

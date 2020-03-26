@@ -4,9 +4,17 @@ require "bundler/setup"
 require "graphql/preload"
 require "rspec-sqlimit"
 require "pry"
+require "yaml"
+
+TESTING_GRAPHQL_RUBY_INTERPRETER =
+  begin
+    env_value = ENV["GRAPHQL_RUBY_INTERPRETER"]
+    env_value ? YAML.safe_load(env_value) : false
+  end
 
 require_relative "support/database"
 require_relative "support/graphql_schema"
+require_relative "support/legacy_graphql_schema"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

@@ -42,5 +42,10 @@ class PreloadSchema < GraphQL::Schema
   use GraphQL::Batch
   enable_preloading
 
+  if TESTING_GRAPHQL_RUBY_INTERPRETER
+    use GraphQL::Execution::Interpreter
+    use GraphQL::Analysis::AST
+  end
+
   query QueryType
 end

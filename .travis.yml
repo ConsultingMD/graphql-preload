@@ -1,9 +1,41 @@
 ---
-sudo: false
 language: ruby
 cache: bundler
-rvm:
-  - 2.5.1
-  - 2.4.4
-  - 2.3.7
-before_install: gem install bundler -v 2.0.2
+before_install: gem install bundler -v '~> 2.0'
+
+jobs:
+  include:
+    - rvm: 2.7.0
+      gemfile: gemfiles/graphql_1.10.gemfile
+      env:
+        - GRAPHQL_RUBY_INTERPRETER=yes
+        - RAILS_VERSION=6.0
+    - rvm: 2.7.0
+      gemfile: gemfiles/graphql_1.10.gemfile
+      env:
+        - GRAPHQL_RUBY_INTERPRETER=no
+        - RAILS_VERSION=6.0
+    - rvm: 2.6.5
+      gemfile: gemfiles/graphql_1.9.gemfile
+      env:
+        - GRAPHQL_RUBY_INTERPRETER=yes
+        - RAILS_VERSION=6.0
+    - rvm: 2.6.5
+      gemfile: gemfiles/graphql_1.9.gemfile
+      env:
+        - GRAPHQL_RUBY_INTERPRETER=no
+        - RAILS_VERSION=6.0
+    - rvm: 2.5.7
+      gemfile: gemfiles/graphql_1.9.gemfile
+      env:
+        - GRAPHQL_RUBY_INTERPRETER=yes
+        - RAILS_VERSION=5.2
+    - rvm: 2.5.7
+      gemfile: gemfiles/graphql_1.9.gemfile
+      env:
+        - GRAPHQL_RUBY_INTERPRETER=no
+        - RAILS_VERSION=5.2
+    - rvm: 2.4.9
+      gemfile: gemfiles/graphql_1.8.gemfile
+      env:
+        - RAILS_VERSION=5.1

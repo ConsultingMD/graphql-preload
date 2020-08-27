@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GraphQL
   module Preload
     # Preloads ActiveRecord::Associations when called from the Preload::Instrument

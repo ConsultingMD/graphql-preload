@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'graphql'
 require 'graphql/batch'
 require 'promise.rb'

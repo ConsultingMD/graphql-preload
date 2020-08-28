@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'graphql'
 require 'graphql/batch'
 require 'promise.rb'
@@ -47,8 +49,8 @@ module GraphQL
 
       def to_graphql
         field_defn = super
-        field_defn.metadata[:preload] = @preload if @preload
-        field_defn.metadata[:preload_scope] = @preload_scope if @preload_scope
+        field_defn.metadata[:preload] = @preload if defined?(@preload) && @preload
+        field_defn.metadata[:preload_scope] = @preload_scope if defined?(@preload_scope) && @preload_scope
         field_defn
       end
     end

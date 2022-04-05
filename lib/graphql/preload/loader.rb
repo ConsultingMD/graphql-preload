@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GraphQL
   module Preload
     # Preloads ActiveRecord::Associations when called from the Preload::Instrument
@@ -22,6 +24,7 @@ module GraphQL
         end
 
         return Promise.resolve(record) if association_loaded?(record)
+
         super
       end
 
@@ -30,7 +33,9 @@ module GraphQL
         records.each { |record| fulfill(record, record) }
       end
 
-      private def association_loaded?(record)
+      private
+
+      def association_loaded?(record)
         record.association(association).loaded?
       end
 
@@ -54,23 +59,21 @@ module GraphQL
         end
       end
 
-      private def preload_scope
+      def preload_scope
         return nil unless scope
+
         reflection = model.reflect_on_association(association)
         raise ArgumentError, 'Cannot specify preload_scope for polymorphic associations' if reflection.polymorphic?
+
         scope if scope.try(:klass) == reflection.klass
       end
 
-      private def validate_association
-        unless association.is_a?(Symbol)
-          raise ArgumentError, 'Association must be a Symbol object'
-        end
-
-        unless model < ActiveRecord::Base
-          raise ArgumentError, 'Model must be an ActiveRecord::Base descendant'
-        end
+      def validate_association
+        raise ArgumentError, 'Association must be a Symbol object' unless association.is_a?(Symbol)
+        raise ArgumentError, "Model #{model} must be an ActiveRecord::Base descendant" unless model < ActiveRecord::Base
 
         return if model.reflect_on_association(association)
+
         raise TypeError, "Association :#{association} does not exist on #{model}"
       end
     end

@@ -12,7 +12,9 @@ module GraphQL
 
         scope = options[:preload_scope].call(arguments, context) if options[:preload_scope]
 
-        preload(object.object, options[:preload], scope).then do
+        record = object.is_a?(GraphQL::Schema::Object) && object.respond_to?(:object) ? object.object : object
+
+        preload(record, options[:preload], scope).then do
           yield(object, arguments)
         end
       end

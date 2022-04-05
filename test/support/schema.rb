@@ -55,9 +55,6 @@ end
 class Schema < GraphQL::Schema
   query QueryType
 
-  use GraphQL::Execution::Interpreter
-  use GraphQL::Analysis::AST
-
   use GraphQL::Batch
   enable_preloading
 end

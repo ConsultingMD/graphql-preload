@@ -40,7 +40,7 @@ module GraphQL
       end
 
       def preload_association(records)
-        ActiveRecord::Associations::Preloader.new.preload(records, association, preload_scope)
+        ActiveRecord::Associations::Preloader.new(records: records, associations: association, scope: preload_scope)
       end
 
       def preload_scope

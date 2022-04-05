@@ -40,7 +40,7 @@ module GraphQL
       end
 
       private def preload_association(records)
-        preloader = ActiveRecord::Associations::Preloader.new.preload(records, association, preload_scope).first
+        preloader = ActiveRecord::Associations::Preloader.new(records: records, associations: association, scope: preload_scope)
         return unless preload_scope
         return if Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new("6.0.0")
 

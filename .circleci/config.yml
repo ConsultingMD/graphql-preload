@@ -28,12 +28,12 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - service-{{ checksum "grnds-imperial.gemspec" }}
+            - service-{{ checksum "graphql-preload.gemspec" }}
       - run: bundle check || bundle install --path vendor/bundle
       - save_cache:
           paths:
             - vendor/bundle
-          key: service-{{ checksum "grnds-imperial.gemspec" }}
+          key: service-{{ checksum "graphql-preload.gemspec" }}
       - run:
           name: Run tests
           command: |

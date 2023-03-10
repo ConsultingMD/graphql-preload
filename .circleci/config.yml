@@ -1,0 +1,57 @@
+version: 2.1
+
+workflows:
+  build:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - publish:
+          requires:
+            - build
+          context:
+            - gemfury
+          filters:
+            # only publish gem after cutting tag
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
+
+
+jobs:
+  build:
+    docker:
+      - image: cimg/ruby:2.7
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - service-{{ checksum "graphql-preload.gemspec" }}
+      - run: bundle check || bundle config set --local path 'vendor/bundle'
+      - save_cache:
+          paths:
+            - vendor/bundle
+          key: service-{{ checksum "graphql-preload.gemspec" }}
+      - run:
+          name: Run tests
+          command: |
+            # bundle exec rspec --profile 10 \
+            #                   --format RspecJunitFormatter \
+            #                   --out /tmp/test-results/rspec.xml \
+            #                   --format progress
+      - store_test_results:
+          path: /tmp/test-results
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: test-results
+
+  publish:
+    docker:
+      - image: cimg/ruby:2.7
+    steps:
+      - checkout
+      - run:
+          name: Build and publish gem to gemfury
+          command: ./.circleci/publish.sh

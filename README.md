@@ -89,3 +89,18 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/Consul
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+
+## How to Create a Release
+
+Releases happen in CircleCI when a tag is pushed to the repository.
+
+To create a release, you will need to do the following:
+
+1. Change the version in `lib/graphql/preload/version.rb` to the new version and create a PR with the change.
+1. Once the PR is merged, switch to the master branch and `git pull`.
+1. `git tag <version from version.rb>`
+1. `git push origin --tags`
+
+CircleCI will see the tag push, build, and release a new version of the library.
+
+

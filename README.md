@@ -28,9 +28,60 @@ First, enable preloading in your `GraphQL::Schema`:
 Schema = GraphQL::Schema.define do
   use GraphQL::Batch
 
-  enable_preloading
+  enable_preloading # Only use this line if using the deprecated `Field Instrument` interface.
 end
 ```
+
+There are two approaches available to config the caching for the field.
+Using currently supported [GraphQL gem](https://graphql-ruby.org/) `Field Extension` interface or `Field Instrument` interface
+which is no longer supported as of `graphql 1.10.0`.
+
+
+#### Field Extension (Preferred):
+
+```ruby
+PostType = GraphQL::ObjectType.define do
+  name 'Post'
+
+  field :comments, [CommentType], null: false do
+    # Post.includes(:comments)
+    extension GraphQL::Preload::FieldExtension, preload: :comments
+
+    # Post.includes(:comments, :authors)
+    extension GraphQL::Preload::FieldExtension, preload: [:comments, :authors]
+
+    # Post.includes(:comments, authors: [:followers, :posts])
+    extension GraphQL::Preload::FieldExtension, preload: [:comments, { authors: [:followers, :posts] }]
+
+    resolve ->(obj, args, ctx) { obj.comments }
+  end
+end
+```
+
+### `preload_scope`
+Starting with Rails 4.1, you can scope your preloaded records by passing a valid scope to [`ActiveRecord::Associations::Preloader`](https://apidock.com/rails/v4.1.8/ActiveRecord/Associations/Preloader/preload). Scoping can improve performance by reducing the number of models to be instantiated and can help with certain business goals (e.g., only returning records that have not been soft deleted).
+
+This functionality is surfaced through the `preload_scope` option:
+
+```ruby
+PostType = GraphQL::ObjectType.define do
+  name 'Post'
+
+  field :comments, [CommentType], null: false do
+    extension GraphQL::Preload::FieldExtension, { preload: :comments, preload_scope: ->(args, ctx) { Comment.where(deleted_at: nil) } }
+
+    # Resolves with records returned from the following query:
+    # SELECT "comments".*
+    # FROM "comments"
+    # WHERE "comments"."deleted_at" IS NULL
+    #   AND "comments"."post_id" IN (1, 2, 3)
+    resolve ->(obj, args, ctx) { obj.comments }
+  end
+end
+```
+
+
+#### Field Instrument (Deprecated):
 
 Call `preload` when defining your field:
 
